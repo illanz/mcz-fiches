@@ -236,6 +236,8 @@ CAT_CSS = """
 .ct img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--line)}
 .ct span{padding:7px 10px 9px;font-family:var(--display);font-weight:700;font-size:14.5px;line-height:1.2}
 .ct span small{display:block;font-family:var(--body);font-weight:400;font-size:12.5px;color:var(--muted);margin-top:2px}
+.noimg{display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;background:var(--bg);border-bottom:1px solid var(--line)}
+.ct .noimg img{width:42%;aspect-ratio:auto;object-fit:contain;background:none;opacity:.55}
 .empty{display:none;padding:30px 0;color:var(--muted)}
 .foot{padding-block:40px 56px;color:var(--muted);font-size:14px}
 @media (max-width:760px){.cnav .wrap{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.cnav input{width:130px;order:-1;margin-left:0}}
@@ -257,7 +259,7 @@ def index(fiches, logo, base_url):
         tiles = []
         for f in items:
             img = f.get("thumb")
-            im = f'<img src="{img}" alt="" loading="lazy" decoding="async">' if img else '<img alt="">'
+            im = f'<img src="{img}" alt="" loading="lazy" decoding="async">' if img else f'<i class="noimg"><img src="/{logo}" alt=""></i>'
             name, sub = split_title_parts(f["title"])
             sub_html = f"<small>{esc(sub)}</small>" if sub else ""
             tiles.append(f'<a class="ct" href="/{f["slug"]}" data-q="{esc(strip_accents(f["title"]).lower())}">{im}<span>{esc(name)}{sub_html}</span></a>')

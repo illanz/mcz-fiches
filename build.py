@@ -211,7 +211,8 @@ def build_fiche(notion, media, photos, state, cfg, pid, category):
         warn(f"{title} : aucune section reconnue")
     return {**model, "id": pid, "title": title, "slug": cfg["slug"], "category": category or cfg.get("category", ""),
             "updated": edited, "photos": gal,
-            "thumb": model.get("cover") or (gal[0]["800"] if gal else None)}
+            "thumb": model.get("cover") or (gal[0]["800"] if gal else None)
+                     or next((v.get("thumb") or v.get("poster") for v in model.get("videos", []) if v.get("thumb") or v.get("poster")), None)}
 
 
 def write_middleware(site):
