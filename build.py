@@ -277,6 +277,12 @@ def main():
     (OUT / "_headers").write_text("/*\n  X-Robots-Tag: noindex, nofollow\n\n/media/*\n  Cache-Control: public, max-age=604800\n")
     (OUT / "404.html").write_text(render.index(fiches, LOGO, BASE_URL), encoding="utf-8")
 
+    (OUT / "rapport-publication.json").write_text(json.dumps({
+        "fiches": len(fiches), "appels_notion": notion.calls,
+        "avertissements": warnings,
+        "detail": [{"slug": f["slug"], "titre": f["title"], "photos": len(f["photos"]), "videos": len(f["videos"]),
+                    "sections": [s["title"] for s in f["sections"]]} for f in fiches],
+    }, ensure_ascii=False, indent=1), encoding="utf-8")
     media.save_meta()
     state_path.write_text(json.dumps(state, ensure_ascii=False))
     n_files = sum(1 for _ in OUT.rglob("*") if _.is_file())
