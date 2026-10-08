@@ -298,10 +298,12 @@ def main():
     site = json.loads((ROOT / "config" / "site.json").read_text(encoding="utf-8"))
     cat_dir = OUT / site["catalogue_path"]
     cat_dir.mkdir()
-    # liste des fiches : adresse non devinable, jamais liée publiquement
-    (cat_dir / "index.html").write_text(render.index(fiches, LOGO, BASE_URL), encoding="utf-8")
-    # accueil et page d'erreur : neutres, sans aucun lien vers les fiches
-    (OUT / "index.html").write_text(render.blank(LOGO), encoding="utf-8")
+    # page d'accueil : liste publique de toutes les fiches (non indexée, comme tout le site)
+    catalogue = render.index(fiches, LOGO, BASE_URL)
+    (OUT / "index.html").write_text(catalogue, encoding="utf-8")
+    # ancienne adresse interne conservée (même contenu) ; elle héberge aussi le rapport
+    (cat_dir / "index.html").write_text(catalogue, encoding="utf-8")
+    # page d'erreur neutre
     (OUT / "404.html").write_text(render.blank(LOGO), encoding="utf-8")
     # les robots doivent pouvoir lire la consigne noindex : on ne bloque pas l'accès
     (OUT / "robots.txt").write_text("User-agent: *\nAllow: /\n")

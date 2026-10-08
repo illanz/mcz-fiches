@@ -2,6 +2,7 @@
 import html
 import json
 import re
+import unicodedata
 from datetime import datetime
 
 from .style import CSS
@@ -65,11 +66,22 @@ def card_nodes(nodes):
     return "".join(out)
 
 
+def strip_accents(s):
+    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+
+
+TITLE_SEP = re.compile(r"\s+[-–—]\s*")
+
+
+def split_title_parts(t):
+    """« NOM - Sous-titre » → (nom, sous-titre)."""
+    parts = TITLE_SEP.split(t.strip(), 1)
+    return (parts[0], parts[1]) if len(parts) == 2 and parts[1] else (t, "")
+
+
 def split_title(t):
-    if " - " in t:
-        a, b = t.split(" - ", 1)
-        return f'{esc(a)}<span class="sub">{esc(b)}</span>'
-    return esc(t)
+    a, b = split_title_parts(t)
+    return f'{esc(a)}<span class="sub">{esc(b)}</span>' if b else esc(t)
 
 
 def table_html(t, primary=False):
@@ -203,21 +215,53 @@ def page(f, logo):
 """
 
 
+CAT_CSS = """
+.cnav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.cnav .wrap{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding-block:10px}
+.cnav a{flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--ink);border-radius:999px;text-decoration:none;color:var(--ink);font-family:var(--display);font-weight:700;font-size:14.5px;line-height:1;background:#fff}
+.cnav a:hover,.cnav a:focus-visible{background:var(--primary)}
+.cnav a small{font-weight:600;font-size:12px;opacity:.7}
+.cnav input{flex:none;width:190px;margin-left:auto;padding:5px 12px;border:1.5px solid var(--line);border-radius:999px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+.cnav input:focus{outline:none;border-color:var(--ink)}
+.intro{padding-block:26px 6px}
+.intro h1{font-size:clamp(30px,4vw,46px)}
+.intro p{margin:8px 0 0;max-width:64ch}
+.csec{scroll-margin-top:110px;padding-top:26px}
+.chead{display:flex;align-items:baseline;gap:14px;padding:12px 18px;background:var(--ink);color:var(--bg);border-radius:14px;border-left:10px solid var(--primary)}
+.chead h2{font-size:clamp(24px,2.8vw,32px);font-weight:900;letter-spacing:.01em;text-transform:uppercase;color:var(--bg)}
+.chead span{font-family:var(--display);font-weight:600;font-size:15px;color:var(--primary)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,165px),1fr));gap:10px;padding-top:12px}
+.ct{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--ink);transition:border-color .15s,transform .15s}
+.ct:hover,.ct:focus-visible{border-color:var(--ink);transform:translateY(-2px)}
+.ct img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--line)}
+.ct span{padding:7px 10px 9px;font-family:var(--display);font-weight:700;font-size:14.5px;line-height:1.2}
+.ct span small{display:block;font-family:var(--body);font-weight:400;font-size:12.5px;color:var(--muted);margin-top:2px}
+.empty{display:none;padding:30px 0;color:var(--muted)}
+.foot{padding-block:40px 56px;color:var(--muted);font-size:14px}
+@media (max-width:760px){.cnav .wrap{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.cnav input{width:130px;order:-1;margin-left:0}}
+@media (max-width:560px){.cgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ct span{font-size:14px}}
+"""
+
+
 def index(fiches, logo, base_url):
+    """Liste publique (non indexée) de toutes les fiches, par catégorie."""
     cats = []
     for f in fiches:
         if f["category"] not in cats:
             cats.append(f["category"])
-    blocks = []
-    for c in cats:
+    nav, blocks = [], []
+    for i, c in enumerate(cats):
+        items = [x for x in fiches if x["category"] == c]
+        anchor = "c-" + (re.sub(r"[^a-z0-9]+", "-", strip_accents(c).lower()).strip("-") or str(i))
+        nav.append(f'<a href="#{anchor}">{esc(c)} <small>{len(items)}</small></a>')
         tiles = []
-        for f in (x for x in fiches if x["category"] == c):
+        for f in items:
             img = f.get("thumb")
-            im = f'<img src="{img}" alt="" loading="lazy">' if img else '<img alt="">'
-            n_ph, n_v = len(f["photos"]), len(f["videos"])
-            link = f"{base_url}/{f['slug']}"
-            tiles.append(f'<div class="tile"><a href="/{f["slug"]}" style="display:flex;flex-direction:column;text-decoration:none">{im}<span class="t"><span class="n">{esc(f["title"])}</span><span class="k">{n_ph} photo{"s" if n_ph > 1 else ""} · {n_v} vidéo{"s" if n_v > 1 else ""}</span></span></a><div class="share"><code>{esc(link)}</code><button type="button" data-copy="{esc(link)}">Copier le lien</button></div></div>')
-        blocks.append(f'<h2 class="cat">{esc(c)}</h2><div class="grid small">{"".join(tiles)}</div>')
+            im = f'<img src="{img}" alt="" loading="lazy" decoding="async">' if img else '<img alt="">'
+            name, sub = split_title_parts(f["title"])
+            sub_html = f"<small>{esc(sub)}</small>" if sub else ""
+            tiles.append(f'<a class="ct" href="/{f["slug"]}" data-q="{esc(strip_accents(f["title"]).lower())}">{im}<span>{esc(name)}{sub_html}</span></a>')
+        blocks.append(f'<section class="csec" id="{anchor}"><div class="chead"><h2>{esc(c)}</h2><span>{len(items)} fiche{"s" if len(items) > 1 else ""}</span></div><div class="cgrid">{"".join(tiles)}</div></section>')
     return f"""<!doctype html>
 <html lang="fr">
 <head>
@@ -227,23 +271,31 @@ def index(fiches, logo, base_url):
 <title>Fiches techniques MadCityZen</title>
 <link rel="icon" href="/{logo}">
 {FONTS}
-<style>{CSS}</style>
+<style>{CSS}{CAT_CSS}</style>
 </head>
 <body>
 <header class="top"><div class="wrap"><img src="/{logo}" alt="MadCityZen"><span class="kicker">Fiches techniques</span></div></header>
-<main class="wrap" style="padding-bottom:64px">
-<h1 style="margin-top:36px;font-size:clamp(32px,4.4vw,52px)">Fiches techniques</h1>
-<p style="max-width:62ch;margin:12px 0 0">{len(fiches)} fiches, mises à jour automatiquement depuis Notion. Copiez le lien d’une fiche pour le joindre à un devis.</p>
+<div class="wrap intro"><h1>Fiches techniques des animations</h1>
+<p>{len(fiches)} animations classées par univers. Cliquez sur une fiche pour consulter le détail technique, le staff, les besoins sur place, les photos et les vidéos.</p></div>
+<nav class="cnav" aria-label="Catégories"><div class="wrap">{"".join(nav)}<input type="search" placeholder="Rechercher…" aria-label="Rechercher une animation" id="q"></div></nav>
+<main class="wrap">
 {"".join(blocks)}
+<p class="empty" id="none">Aucune animation ne correspond à cette recherche.</p>
 </main>
+<div class="wrap foot">MadCityZen · Animations et team building · <a href="https://www.madcityzen.fr">www.madcityzen.fr</a></div>
 <script>
-document.addEventListener('click', function(e){{
-  var b=e.target.closest('[data-copy]'); if(!b) return;
-  var t=b.getAttribute('data-copy');
-  function done(){{ b.textContent='Lien copié'; setTimeout(function(){{ b.textContent='Copier le lien'; }},1800); }}
-  function fallback(){{ var r=document.createRange(); r.selectNodeContents(b.previousElementSibling); var s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent='Lien sélectionné'; }}
-  try{{ navigator.clipboard.writeText(t).then(done, fallback); }}catch(err){{ fallback(); }}
-}});
+(function(){{
+  var q=document.getElementById('q'), none=document.getElementById('none');
+  function norm(s){{ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }}
+  q.addEventListener('input', function(){{
+    var v=norm(q.value), any=false;
+    document.querySelectorAll('.csec').forEach(function(sec){{
+      var n=0; sec.querySelectorAll('.ct').forEach(function(t){{ var ok=!v||t.getAttribute('data-q').indexOf(v)>=0; t.hidden=!ok; if(ok) n++; }});
+      sec.hidden=n===0; if(n) any=true;
+    }});
+    none.style.display=any?'none':'block';
+  }});
+}})();
 </script>
 </body>
 </html>

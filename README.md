@@ -11,9 +11,12 @@ Cloudflare Pages : **https://fiches.madcityzen.fr**
 - **Ajouter des photos** : ajouter une ligne dans « Photos Animations » avec la bonne étiquette.
 - **Publier tout de suite** : GitHub → onglet **Actions** → « Publier les fiches techniques »
   → **Run workflow**.
-- **Lien d'une fiche** : `https://fiches.madcityzen.fr/<nom-de-la-fiche>`. La liste complète, avec
-  les boutons « Copier le lien », est à une adresse interne non devinable :
-  `https://fiches.madcityzen.fr/<catalogue_path>/` (voir `config/site.json`). Ne jamais la publier.
+- **Lien d'une fiche** : `https://fiches.madcityzen.fr/<nom-de-la-fiche>`.
+- **Toutes les fiches** : `https://fiches.madcityzen.fr/` liste les fiches par catégorie (vignettes,
+  navigation par catégorie, recherche). Elle peut être communiquée aux agences et revendeurs ; comme
+  le reste du site, elle n'est jamais indexée par les moteurs de recherche.
+- **Rapport de la dernière publication** : `https://fiches.madcityzen.fr/<catalogue_path>/rapport-publication.json`
+  (adresse interne, voir `config/site.json`).
 
 ## Ajouter une nouvelle fiche
 
@@ -33,6 +36,5 @@ Cloudflare Pages : **https://fiches.madcityzen.fr**
 - Un cache évite de retraiter ce qui n'a pas changé.
 - Non-référencement : balise `robots` et en-tête `X-Robots-Tag` (noindex, nofollow, noarchive,
   nosnippet, noimageindex) sur toutes les réponses, y compris photos et vidéos ; `robots.txt` laisse
-  passer les robots pour qu'ils lisent cette consigne ; accueil et page d'erreur neutres, sans lien
-  vers les fiches ; l'adresse technique `*.pages.dev` redirige vers le domaine (`redirect_pages_dev`).
+  passer les robots pour qu'ils lisent cette consigne ; page d'erreur neutre ; l'adresse technique `*.pages.dev` redirige vers le domaine (`redirect_pages_dev`).
 - Secrets GitHub nécessaires : `NOTION_TOKEN`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
