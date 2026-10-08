@@ -214,6 +214,28 @@ def build_fiche(notion, media, photos, state, cfg, pid, category):
             "thumb": model.get("cover") or (gal[0]["800"] if gal else None)}
 
 
+def write_middleware(site):
+    """Fonction Cloudflare exécutée à chaque requête : consigne noindex sur toute réponse,
+    et redirection de l'adresse technique *.pages.dev vers le domaine définitif (une fois actif)."""
+    fdir = ROOT / "functions"
+    fdir.mkdir(exist_ok=True)
+    redirect = "true" if site.get("redirect_pages_dev") else "false"
+    (fdir / "_middleware.js").write_text(f"""const ROBOTS = "{render.ROBOTS}";
+const REDIRECT = {redirect};
+const DOMAIN = "{site['custom_domain']}";
+export async function onRequest(ctx) {{
+  const url = new URL(ctx.request.url);
+  if (REDIRECT && url.hostname.endsWith(".pages.dev")) {{
+    return Response.redirect("https://" + DOMAIN + url.pathname + url.search, 301);
+  }}
+  const res = await ctx.next();
+  const out = new Response(res.body, res);
+  out.headers.set("X-Robots-Tag", ROBOTS);
+  return out;
+}}
+""", encoding="utf-8")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="slugs séparés par des virgules (test)")
@@ -273,12 +295,19 @@ def main():
 
     (OUT / "media").mkdir(exist_ok=True)
     shutil.copy2(ROOT / "assets" / "logo-madcityzen.svg", OUT / LOGO)
-    (OUT / "index.html").write_text(render.index(fiches, LOGO, BASE_URL), encoding="utf-8")
-    (OUT / "robots.txt").write_text("User-agent: *\nDisallow: /\n")
-    (OUT / "_headers").write_text("/*\n  X-Robots-Tag: noindex, nofollow\n\n/media/*\n  Cache-Control: public, max-age=604800\n")
-    (OUT / "404.html").write_text(render.index(fiches, LOGO, BASE_URL), encoding="utf-8")
-
-    (OUT / "rapport-publication.json").write_text(json.dumps({
+    site = json.loads((ROOT / "config" / "site.json").read_text(encoding="utf-8"))
+    cat_dir = OUT / site["catalogue_path"]
+    cat_dir.mkdir()
+    # liste des fiches : adresse non devinable, jamais liée publiquement
+    (cat_dir / "index.html").write_text(render.index(fiches, LOGO, BASE_URL), encoding="utf-8")
+    # accueil et page d'erreur : neutres, sans aucun lien vers les fiches
+    (OUT / "index.html").write_text(render.blank(LOGO), encoding="utf-8")
+    (OUT / "404.html").write_text(render.blank(LOGO), encoding="utf-8")
+    # les robots doivent pouvoir lire la consigne noindex : on ne bloque pas l'accès
+    (OUT / "robots.txt").write_text("User-agent: *\nAllow: /\n")
+    (OUT / "_headers").write_text(f"/*\n  X-Robots-Tag: {render.ROBOTS}\n  Referrer-Policy: no-referrer\n\n/media/*\n  Cache-Control: public, max-age=604800\n")
+    write_middleware(site)
+    (cat_dir / "rapport-publication.json").write_text(json.dumps({
         "fiches": len(fiches), "appels_notion": notion.calls,
         "avertissements": warnings,
         "detail": [{"slug": f["slug"], "titre": f["title"], "photos": len(f["photos"]), "videos": len(f["videos"]),

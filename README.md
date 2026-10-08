@@ -11,8 +11,9 @@ Cloudflare Pages : **https://fiches.madcityzen.fr**
 - **Ajouter des photos** : ajouter une ligne dans « Photos Animations » avec la bonne étiquette.
 - **Publier tout de suite** : GitHub → onglet **Actions** → « Publier les fiches techniques »
   → **Run workflow**.
-- **Lien d'une fiche** : `https://fiches.madcityzen.fr/<nom-de-la-fiche>` (liste et boutons
-  « Copier le lien » sur la page d'accueil du site).
+- **Lien d'une fiche** : `https://fiches.madcityzen.fr/<nom-de-la-fiche>`. La liste complète, avec
+  les boutons « Copier le lien », est à une adresse interne non devinable :
+  `https://fiches.madcityzen.fr/<catalogue_path>/` (voir `config/site.json`). Ne jamais la publier.
 
 ## Ajouter une nouvelle fiche
 
@@ -30,5 +31,8 @@ Cloudflare Pages : **https://fiches.madcityzen.fr**
   couvertures, miniatures Vimeo et vidéos Notion (converties en MP4 ≤ 24 Mo), puis génère `out/`.
 - Le texte est repris **tel quel** de Notion ; toute section non standard est conservée.
 - Un cache évite de retraiter ce qui n'a pas changé.
-- Les pages sont exclues des moteurs de recherche (`noindex`).
+- Non-référencement : balise `robots` et en-tête `X-Robots-Tag` (noindex, nofollow, noarchive,
+  nosnippet, noimageindex) sur toutes les réponses, y compris photos et vidéos ; `robots.txt` laisse
+  passer les robots pour qu'ils lisent cette consigne ; accueil et page d'erreur neutres, sans lien
+  vers les fiches ; l'adresse technique `*.pages.dev` redirige vers le domaine (`redirect_pages_dev`).
 - Secrets GitHub nécessaires : `NOTION_TOKEN`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.

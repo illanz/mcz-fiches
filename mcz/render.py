@@ -6,6 +6,8 @@ from datetime import datetime
 
 from .style import CSS
 
+ROBOTS = "noindex, nofollow, noarchive, nosnippet, noimageindex"
+
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gabarito:wght@600;700;800;900&family=Figtree:wght@400;500;600&display=swap">')
@@ -172,7 +174,7 @@ def page(f, logo):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="{ROBOTS}">
 <title>{esc(short.title())} · Fiche technique MadCityZen</title>
 <link rel="icon" href="/{logo}">
 {FONTS}
@@ -221,7 +223,7 @@ def index(fiches, logo, base_url):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="{ROBOTS}">
 <title>Fiches techniques MadCityZen</title>
 <link rel="icon" href="/{logo}">
 {FONTS}
@@ -243,6 +245,29 @@ document.addEventListener('click', function(e){{
   try{{ navigator.clipboard.writeText(t).then(done, fallback); }}catch(err){{ fallback(); }}
 }});
 </script>
+</body>
+</html>
+"""
+
+
+def blank(logo):
+    """Page neutre (accueil et erreur) : aucun lien vers les fiches."""
+    return f"""<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="{ROBOTS}">
+<title>MadCityZen</title>
+<link rel="icon" href="/{logo}">
+{FONTS}
+<style>{CSS}</style>
+</head>
+<body>
+<main class="wrap" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center">
+<img src="/{logo}" alt="MadCityZen" style="height:72px;width:auto">
+<p style="max-width:44ch;margin:0">Cette page n’est pas disponible. Pour toute information, rendez-vous sur <a href="https://www.madcityzen.fr">www.madcityzen.fr</a>.</p>
+</main>
 </body>
 </html>
 """

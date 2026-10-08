@@ -1,0 +1,6 @@
+{
+ "_doc": "Réglages du site. 'catalogue_path' : adresse non devinable de la liste des fiches (usage interne). 'redirect_pages_dev' : passer à true une fois fiches.madcityzen.fr actif, pour rediriger l'adresse technique mcz-fiches.pages.dev.",
+ "custom_domain": "fiches.madcityzen.fr",
+ "catalogue_path": "catalogue-zokxu8msaa93fyqd",
+ "redirect_pages_dev": false
+}
