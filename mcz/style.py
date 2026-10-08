@@ -19,7 +19,13 @@ header.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:
 header.top img{height:46px;width:auto;display:block}
 .kicker{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.09em;text-transform:uppercase}
 .meta{font-size:14px;color:var(--muted)}
-.headline{display:flex;flex-wrap:wrap;gap:28px;align-items:stretch;padding-block:36px 0}
+.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;padding-top:20px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:2px solid var(--ink);border-radius:999px;background:var(--ink);color:var(--bg);font-family:var(--display);font-weight:700;font-size:16px;line-height:1.1;text-decoration:none;cursor:pointer}
+.btn:hover,.btn:focus-visible{background:var(--primary);border-color:var(--primary);color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover,.btn.ghost:focus-visible{background:var(--primary);border-color:var(--primary)}
+@media (max-width:560px){.actions{justify-content:stretch}.actions .btn{flex:1 1 0;justify-content:center;padding-inline:10px;font-size:15px}}
+.headline{display:flex;flex-wrap:wrap;gap:28px;align-items:stretch;padding-block:20px 0}
 .headline .txt{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:16px}
 .headline .cover{flex:1 1 360px;min-width:0}
 .headline .cover img{width:100%;height:100%;min-height:220px;max-height:340px;object-fit:cover;display:block;border-radius:24px}

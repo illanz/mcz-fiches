@@ -109,8 +109,29 @@ def dur(sec):
     return f"{int(sec) // 60}:{int(sec) % 60:02d}" if sec else None
 
 
-def page(f, logo):
-    """f : modèle complet d'une fiche (contenu + médias préparés)."""
+DL_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>'
+PRINT_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>'
+
+PRINT_JS = """<script>
+(function(){
+  var b=document.getElementById('print-pdf'); if(!b) return;
+  b.addEventListener('click', function(){
+    var url=b.getAttribute('data-pdf');
+    var ua=navigator.userAgent, mobile=/Android|iPhone|iPad|iPod/i.test(ua) || (navigator.maxTouchPoints>1 && /Macintosh/.test(ua));
+    var safari=/^((?!chrome|chromium|android|crios|fxios|edg).)*safari/i.test(ua);
+    if(mobile || safari){ window.open(url, '_blank', 'noopener'); return; }
+    var old=document.getElementById('print-frame'); if(old) old.remove();
+    var f=document.createElement('iframe'); f.id='print-frame'; f.src=url;
+    f.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
+    f.onload=function(){ setTimeout(function(){ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){ window.open(url,'_blank','noopener'); } }, 300); };
+    document.body.appendChild(f);
+  });
+})();
+</script>"""
+
+
+def page(f, logo, pdf=None):
+    """f : modèle complet d'une fiche (contenu + médias préparés) ; pdf : adresse du résumé A4."""
     title = f["title"]
     secs = f["sections"]
     by_key = {}
@@ -180,7 +201,12 @@ def page(f, logo):
     if vids or photos or media_extra:
         media_html = f'<section class="media"><div class="wrap"><h2>{esc(media_title)}</h2>{media_extra}{vids_html}{gal}</div></section>'
 
-    short = title.split(" - ")[0]
+    actions = ""
+    if pdf:
+        fname = f"Fiche-technique-MadCityZen-{f['slug']}.pdf"
+        actions = (f'<div class="actions"><a class="btn" href="{pdf}" download="{fname}">{DL_ICON}<span>Télécharger la fiche PDF</span></a>'
+                   f'<button type="button" class="btn ghost" id="print-pdf" data-pdf="{pdf}">{PRINT_ICON}<span>Imprimer</span></button></div>')
+    short = split_title_parts(title)[0]
     return f"""<!doctype html>
 <html lang="fr">
 <head>
@@ -199,6 +225,7 @@ def page(f, logo):
 </div></header>
 <main>
 <section class="wrap">
+{actions}
 <div class="headline">
 <div class="txt"><h1>{split_title(title)}</h1>{callout}</div>
 {cover_html}
@@ -210,6 +237,7 @@ def page(f, logo):
 </main>
 <footer class="bot"><div class="wrap"><span class="kicker">MadCityZen · {esc(title)}</span><a href="https://www.madcityzen.fr" target="_blank" rel="noopener">www.madcityzen.fr</a></div></footer>
 {LIGHTBOX_JS if photos else ""}
+{PRINT_JS if pdf else ""}
 </body>
 </html>
 """

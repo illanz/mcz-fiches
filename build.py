@@ -14,7 +14,8 @@ from pathlib import Path
 from mcz.notion import Notion, plain, file_url
 from mcz.parse import FicheParser
 from mcz.media import Media, key
-from mcz import render
+from mcz import render, pdf
+import hashlib
 
 ROOT = Path(__file__).parent
 OUT = ROOT / "out"
@@ -22,7 +23,7 @@ CACHE = ROOT / ".cache"
 INDEX_PAGE = "8a50a915e7434ef39a6ac8d31fed6d21"          # « Fiches Descriptives Animations »
 PHOTOS_DS = "15a9f3e2-8e61-483f-82bf-69ae5dcb4b1f"        # base « Photos Animations »
 BASE_URL = "https://fiches.madcityzen.fr"
-LOGO = "media/logo-madcityzen.svg"
+LOGO = "media/logo-mcz-2025.svg"  # renommer à chaque changement de logo (caches navigateurs)
 PARSER_VERSION = 3  # à incrémenter quand la lecture des fiches change : force leur relecture
 
 warnings = []
@@ -215,6 +216,49 @@ def build_fiche(notion, media, photos, state, cfg, pid, category):
                      or next((v.get("thumb") or v.get("poster") for v in model.get("videos", []) if v.get("thumb") or v.get("poster")), None)}
 
 
+def make_pdfs(fiches):
+    """Résumé A4 imprimable de chaque fiche (out/pdf/<slug>.pdf), mis en cache selon son contenu."""
+    fdir = OUT / "assets"
+    fdir.mkdir(exist_ok=True)
+    for w in (ROOT / "assets" / "fonts").glob("*.woff2"):
+        shutil.copy2(w, fdir / w.name)
+    (OUT / "pdf").mkdir(exist_ok=True)
+    pcache = CACHE / "pdf"
+    pcache.mkdir(exist_ok=True)
+    todo = []
+    for f in fiches:
+        doc = pdf.page(f, LOGO, BASE_URL)
+        h = hashlib.sha256(doc.encode()).hexdigest()[:20]
+        cached = pcache / f"{h}.pdf"
+        if cached.exists():
+            shutil.copy2(cached, OUT / "pdf" / f"{f['slug']}.pdf")
+        else:
+            todo.append((f, doc, cached))
+    log(f"PDF : {len(fiches) - len(todo)} en cache, {len(todo)} à générer")
+    if not todo:
+        return
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        pg = browser.new_page()
+        for f, doc, cached in todo:
+            src = OUT / f"__pdf_{f['slug']}.html"
+            src.write_text(doc, encoding="utf-8")
+            try:
+                pg.goto(src.resolve().as_uri())
+                pg.wait_for_function("window.__fit", timeout=30000)
+                fit = pg.evaluate("window.__fit")
+                if fit.get("over"):
+                    warn(f"{f['slug']} : le résumé PDF déborde d'une page")
+                pg.pdf(path=str(cached), format="A4", print_background=True, prefer_css_page_size=True)
+                shutil.copy2(cached, OUT / "pdf" / f"{f['slug']}.pdf")
+            except Exception as e:
+                warn(f"{f['slug']} : PDF non généré ({e})")
+            finally:
+                src.unlink(missing_ok=True)
+        browser.close()
+
+
 def write_middleware(site):
     """Fonction Cloudflare exécutée à chaque requête : consigne noindex sur toute réponse,
     et redirection de l'adresse technique *.pages.dev vers le domaine définitif (une fois actif)."""
@@ -291,11 +335,14 @@ def main():
         except Exception as e:
             warn(f"{cfg['slug']} : erreur, fiche ignorée ({e})")
             continue
-        (OUT / f"{f['slug']}.html").write_text(render.page(f, LOGO), encoding="utf-8")
         fiches.append(f)
 
     (OUT / "media").mkdir(exist_ok=True)
     shutil.copy2(ROOT / "assets" / "logo-madcityzen.svg", OUT / LOGO)
+    make_pdfs(fiches)
+    for f in fiches:
+        has_pdf = (OUT / "pdf" / f"{f['slug']}.pdf").exists()
+        (OUT / f"{f['slug']}.html").write_text(render.page(f, LOGO, f"/pdf/{f['slug']}.pdf" if has_pdf else None), encoding="utf-8")
     site = json.loads((ROOT / "config" / "site.json").read_text(encoding="utf-8"))
     cat_dir = OUT / site["catalogue_path"]
     cat_dir.mkdir()

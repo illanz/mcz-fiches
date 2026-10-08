@@ -15,6 +15,11 @@ Cloudflare Pages : **https://fiches.madcityzen.fr**
 - **Toutes les fiches** : `https://fiches.madcityzen.fr/` liste les fiches par catégorie (vignettes,
   navigation par catégorie, recherche). Elle peut être communiquée aux agences et revendeurs ; comme
   le reste du site, elle n'est jamais indexée par les moteurs de recherche.
+- **Résumé PDF** : chaque fiche propose en haut « Télécharger la fiche PDF » et « Imprimer ». Le PDF
+  (une page A4 : infos pratiques, résumé du déroulé, photos, QR code) est régénéré automatiquement
+  quand la fiche change : `https://fiches.madcityzen.fr/pdf/<nom-de-la-fiche>.pdf`.
+- **Logo** : `assets/logo-madcityzen.svg` (version rose / violet / bleu de la charte). En cas de
+  changement de logo, changer aussi le nom `LOGO` dans `build.py` pour forcer la mise à jour des navigateurs.
 - **Rapport de la dernière publication** : `https://fiches.madcityzen.fr/<catalogue_path>/rapport-publication.json`
   (adresse interne, voir `config/site.json`).
 
