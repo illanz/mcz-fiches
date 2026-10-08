@@ -1,6 +1,9 @@
 name: Publier les fiches techniques
 
 on:
+  push:
+    branches: [main]
+    paths: ["build.py", "mcz/**", "config/**", "assets/**", "requirements.txt", ".github/workflows/**"]
   schedule:
     # 3 mises à jour par jour (heures UTC) : ~5h, 12h et 17h à Paris
     - cron: "0 3 * * *"
