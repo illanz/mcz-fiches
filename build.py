@@ -23,6 +23,7 @@ INDEX_PAGE = "8a50a915e7434ef39a6ac8d31fed6d21"          # « Fiches Descriptive
 PHOTOS_DS = "15a9f3e2-8e61-483f-82bf-69ae5dcb4b1f"        # base « Photos Animations »
 BASE_URL = "https://fiches.madcityzen.fr"
 LOGO = "media/logo-madcityzen.svg"
+PARSER_VERSION = 2  # à incrémenter quand la lecture des fiches change : force leur relecture
 
 warnings = []
 
@@ -140,7 +141,7 @@ def build_fiche(notion, media, photos, state, cfg, pid, category):
     edited = p["last_edited_time"]
     fstate = state.setdefault("fiches", {}).get(pid)
 
-    if fstate and fstate["edited"] == edited and fstate.get("model"):
+    if fstate and fstate["edited"] == edited and fstate.get("model") and fstate.get("v") == PARSER_VERSION:
         model = fstate["model"]
         # médias déjà préparés : on republie depuis le cache
         if model.get("cover_key"):
@@ -194,7 +195,7 @@ def build_fiche(notion, media, photos, state, cfg, pid, category):
             k = key("bodyimg", im["block_id"], im.get("edited"))
             if media.image(im["url"], k):
                 model["body_photo_keys"].append(k)
-        state["fiches"][pid] = {"edited": edited, "model": model}
+        state["fiches"][pid] = {"edited": edited, "model": model, "v": PARSER_VERSION}
 
     # photos de la galerie
     gallery = []

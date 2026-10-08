@@ -28,7 +28,7 @@ def section_key(title):
     n = norm(title)
     if n.startswith("deroule"):
         return "deroule"
-    if n.startswith("option"):
+    if n.startswith("options") or n == "option":
         return "options"
     if n.startswith("fiche technique"):
         return "technique"
@@ -180,7 +180,7 @@ class FicheParser:
                     continue
                 if not text:
                     continue
-                if self.cur and self.cur["key"] == "media" and section_key(text) != "media":
+                if self.cur and self.cur["key"] == "media" and section_key(text) is None:
                     self.pending_label = text  # ex. « Option : Clip Animé Mosaic Balade »
                     continue
                 self.open_section(text)
