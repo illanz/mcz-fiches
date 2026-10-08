@@ -23,7 +23,7 @@ INDEX_PAGE = "8a50a915e7434ef39a6ac8d31fed6d21"          # « Fiches Descriptive
 PHOTOS_DS = "15a9f3e2-8e61-483f-82bf-69ae5dcb4b1f"        # base « Photos Animations »
 BASE_URL = "https://fiches.madcityzen.fr"
 LOGO = "media/logo-madcityzen.svg"
-PARSER_VERSION = 2  # à incrémenter quand la lecture des fiches change : force leur relecture
+PARSER_VERSION = 3  # à incrémenter quand la lecture des fiches change : force leur relecture
 
 warnings = []
 

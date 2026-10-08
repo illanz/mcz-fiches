@@ -111,11 +111,11 @@ class Media:
                         for chunk in r.iter_content(1 << 20):
                             f.write(chunk)
                 ok = False
-                for height, crf in ((720, 26), (720, 30), (540, 32), (480, 34)):
+                for height, crf, abr in ((720, 26, "128k"), (720, 30, "128k"), (540, 32, "96k"), (480, 34, "96k"), (360, 36, "64k"), (360, 40, "48k")):
                     dst = Path(td) / "out.mp4"
                     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-i", str(src),
                            "-vf", f"scale=-2:'min({height},ih)'", "-c:v", "libx264", "-preset", "veryfast",
-                           "-crf", str(crf), "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k",
+                           "-crf", str(crf), "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", abr,
                            "-movflags", "+faststart", str(dst)]
                     if subprocess.run(cmd).returncode != 0:
                         break
