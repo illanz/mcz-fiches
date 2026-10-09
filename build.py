@@ -339,6 +339,9 @@ def main():
 
     (OUT / "media").mkdir(exist_ok=True)
     shutil.copy2(ROOT / "assets" / "logo-madcityzen.svg", OUT / LOGO)
+    # photos sources déposées via Claude (référencées en images externes dans Notion)
+    if (ROOT / "assets" / "uploads").exists():
+        shutil.copytree(ROOT / "assets" / "uploads", OUT / "uploads")
     make_pdfs(fiches)
     for f in fiches:
         has_pdf = (OUT / "pdf" / f"{f['slug']}.pdf").exists()
