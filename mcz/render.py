@@ -290,7 +290,7 @@ def index(fiches, logo, base_url):
             im = f'<img src="{img}" alt="" loading="lazy" decoding="async">' if img else f'<i class="noimg"><img src="/{logo}" alt=""></i>'
             name, sub = split_title_parts(f["title"])
             sub_html = f"<small>{esc(sub)}</small>" if sub else ""
-            tiles.append(f'<a class="ct" href="/{f["slug"]}" data-q="{esc(strip_accents(f["title"]).lower())}">{im}<span>{esc(name)}{sub_html}</span></a>')
+            tiles.append(f'<a class="ct" href="/{f["slug"]}" data-q="{esc(strip_accents(f["title"] + " " + c).lower())}">{im}<span>{esc(name)}{sub_html}</span></a>')
         blocks.append(f'<section class="csec" id="{anchor}"><div class="chead"><h2>{esc(c)}</h2><span>{len(items)} fiche{"s" if len(items) > 1 else ""}</span></div><div class="cgrid">{"".join(tiles)}</div></section>')
     return f"""<!doctype html>
 <html lang="fr">
@@ -306,10 +306,11 @@ def index(fiches, logo, base_url):
 <body>
 <header class="top"><div class="wrap"><img src="/{logo}" alt="MadCityZen"><span class="kicker">Fiches techniques</span></div></header>
 <div class="wrap intro"><h1>Fiches techniques des animations</h1>
-<p>{len(fiches)} animations classées par univers. Cliquez sur une fiche pour consulter le détail technique, le staff, les besoins sur place, les photos et les vidéos.</p></div>
+<p>Nos {len(fiches)} animations classées par univers. Cliquez sur une fiche pour consulter le détail technique, le staff, les besoins sur place, les photos et les vidéos.</p></div>
 <nav class="cnav" aria-label="Catégories"><div class="wrap">{"".join(nav)}<input type="search" placeholder="Rechercher…" aria-label="Rechercher une animation" id="q"></div></nav>
 <main class="wrap">
 {"".join(blocks)}
+<section class="csec" id="results" hidden><div class="chead"><h2>Résultats</h2><span id="rcount"></span></div><div class="cgrid" id="rgrid"></div></section>
 <p class="empty" id="none">Aucune animation ne correspond à cette recherche.</p>
 </main>
 <div class="wrap foot">MadCityZen · Animations et team building · <a href="https://www.madcityzen.fr">www.madcityzen.fr</a></div>
@@ -317,13 +318,26 @@ def index(fiches, logo, base_url):
 (function(){{
   var q=document.getElementById('q'), none=document.getElementById('none');
   function norm(s){{ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }}
+  var res=document.getElementById('results'), rgrid=document.getElementById('rgrid'), rcount=document.getElementById('rcount');
+  var cats=[].slice.call(document.querySelectorAll('.csec:not(#results)'));
+  document.querySelectorAll('.cnav a').forEach(function(a){{ a.addEventListener('click', function(){{ if(q.value){{ q.value=''; q.dispatchEvent(new Event('input')); }} }}); }});
   q.addEventListener('input', function(){{
-    var v=norm(q.value), any=false;
-    document.querySelectorAll('.csec').forEach(function(sec){{
-      var n=0; sec.querySelectorAll('.ct').forEach(function(t){{ var ok=!v||t.getAttribute('data-q').indexOf(v)>=0; t.hidden=!ok; if(ok) n++; }});
-      sec.hidden=n===0; if(n) any=true;
+    var v=norm(q.value);
+    rgrid.innerHTML='';
+    if(!v){{ cats.forEach(function(sec){{ sec.hidden=false; }}); res.hidden=true; none.style.display='none'; return; }}
+    var seen={{}}, hits=[];
+    cats.forEach(function(sec){{
+      sec.hidden=true;
+      sec.querySelectorAll('.ct').forEach(function(t){{
+        var h=t.getAttribute('href');
+        if(t.getAttribute('data-q').indexOf(v)>=0 && !seen[h]){{ seen[h]=1; hits.push(t); }}
+      }});
     }});
-    none.style.display=any?'none':'block';
+    hits.sort(function(a,b){{ return a.getAttribute('data-q').localeCompare(b.getAttribute('data-q')); }});
+    hits.forEach(function(t){{ rgrid.appendChild(t.cloneNode(true)); }});
+    var n=hits.length;
+    res.hidden=n===0; rcount.textContent=n+' fiche'+(n>1?'s':'');
+    none.style.display=n?'none':'block';
   }});
 }})();
 </script>
