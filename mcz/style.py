@@ -77,9 +77,8 @@ video{width:100%;aspect-ratio:16/9;display:block;border-radius:20px;border:1px s
 footer.bot{background:var(--ink);color:var(--bg)}
 footer.bot .wrap{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between;padding-block:28px}
 footer.bot a{color:var(--bg)}
-.fftb{display:inline-flex;align-items:center;gap:10px;padding-left:18px;border-left:1.5px solid var(--line)}
-.fftb img{flex:none;height:38px;width:auto;display:block}
-.fftb span{font-size:11.5px;line-height:1.35;letter-spacing:.01em;color:var(--muted);font-weight:500}
+.fftb{display:inline-flex;align-items:center;padding-left:18px;border-left:1.5px solid var(--line)}
+.fftb img{flex:none;height:32px;width:auto;display:block}
 @media (max-width:560px){.fftb{padding-left:0;border-left:0}}
 .lb{position:fixed;inset:0;background:rgba(30,24,28,.92);display:flex;align-items:center;justify-content:center;padding:24px;z-index:10}
 .lb img{max-width:100%;max-height:100%;border-radius:12px}

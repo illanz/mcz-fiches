@@ -118,7 +118,7 @@ def page(f, logo, base_url, logo_fftb=None):
 
     callout = f'<p class="callout">{f["callout"]}</p>' if f.get("callout") else ""
 
-    fftb = f'<span class="fb"><img src="{logo_fftb}" alt="">Membre de la<br>Fédération Française<br>de Team Building</span>' if logo_fftb else ""
+    fftb = f'<span class="fb"><img src="{logo_fftb}" alt="Fédération Française de Team Building"></span>' if logo_fftb else ""
 
     return f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
@@ -136,8 +136,8 @@ header{{display:flex;justify-content:space-between;align-items:center;border-bot
 header .brand{{display:flex;align-items:center;gap:4mm}}
 header .brand>img{{height:12mm}}
 header .k{{text-align:right;font-family:Gabarito,Arial,sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:8.5pt}}
-header .fb{{display:inline-flex;align-items:center;gap:2.2mm;padding-left:4mm;border-left:1px solid var(--line);font-family:Figtree,Arial,sans-serif;font-weight:500;font-size:6.6pt;line-height:1.25;color:var(--muted);text-transform:none;letter-spacing:0}}
-header .fb img{{height:9mm;width:auto;flex:none}}
+header .fb{{display:inline-flex;align-items:center;padding-left:4mm;border-left:1px solid var(--line)}}
+header .fb img{{height:8mm;width:auto;flex:none}}
 header .k small{{display:block;font-family:Figtree,Arial,sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);font-size:8pt;margin-top:1mm}}
 .title{{margin:4.5mm 0 3mm}}
 h1{{margin:0;font-family:Gabarito,Arial,sans-serif;font-weight:900;font-size:2.55em;line-height:1.02}}

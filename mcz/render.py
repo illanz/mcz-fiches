@@ -208,8 +208,7 @@ def page(f, logo, pdf=None, logo_fftb=None):
                    f'<button type="button" class="btn ghost" id="print-pdf" data-pdf="{pdf}">{PRINT_ICON}<span>Imprimer</span></button></div>')
     short = split_title_parts(title)[0]
     fftb_badge = (f'<div class="fftb" title="Membre de la Fédération Française de Team Building">'
-                  f'<img src="/{logo_fftb}" alt="" width="34" height="36" loading="lazy">'
-                  f'<span>Membre de la<br>Fédération Française<br>de Team Building</span></div>') if logo_fftb else ""
+                  f'<img src="/{logo_fftb}" alt="Fédération Française de Team Building" loading="lazy"></div>') if logo_fftb else ""
     return f"""<!doctype html>
 <html lang="fr">
 <head>
