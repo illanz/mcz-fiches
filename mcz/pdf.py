@@ -59,7 +59,7 @@ def deroule_summary(sections, budget=520):
     return out, cut or len(out) < len(flat)
 
 
-def page(f, logo, base_url):
+def page(f, logo, base_url, logo_fftb=None):
     url = f"{base_url}/{f['slug']}"
     by_key = {}
     for s in f["sections"]:
@@ -118,6 +118,8 @@ def page(f, logo, base_url):
 
     callout = f'<p class="callout">{f["callout"]}</p>' if f.get("callout") else ""
 
+    fftb = f'<span class="fb"><img src="{logo_fftb}" alt="">Membre de la<br>Fédération Française<br>de Team Building</span>' if logo_fftb else ""
+
     return f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="robots" content="{ROBOTS}">
@@ -131,8 +133,11 @@ def page(f, logo, base_url):
 html,body{{margin:0;padding:0;background:#fff;color:var(--ink);font-family:Figtree,Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 .sheet{{width:210mm;height:297mm;padding:11mm 12mm 9mm;display:flex;flex-direction:column;overflow:hidden;font-size:var(--fs);line-height:1.38}}
 header{{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--primary);padding-bottom:3.5mm}}
-header img{{height:12mm}}
+header .brand{{display:flex;align-items:center;gap:4mm}}
+header .brand>img{{height:12mm}}
 header .k{{text-align:right;font-family:Gabarito,Arial,sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:8.5pt}}
+header .fb{{display:inline-flex;align-items:center;gap:2.2mm;padding-left:4mm;border-left:1px solid var(--line);font-family:Figtree,Arial,sans-serif;font-weight:500;font-size:6.6pt;line-height:1.25;color:var(--muted);text-transform:none;letter-spacing:0}}
+header .fb img{{height:9mm;width:auto;flex:none}}
 header .k small{{display:block;font-family:Figtree,Arial,sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);font-size:8pt;margin-top:1mm}}
 .title{{margin:4.5mm 0 3mm}}
 h1{{margin:0;font-family:Gabarito,Arial,sans-serif;font-weight:900;font-size:2.55em;line-height:1.02}}
@@ -170,7 +175,7 @@ h1 .sub{{display:block;font-weight:700;font-size:.46em;line-height:1.25;margin-t
 footer{{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:2mm;margin-top:3mm;font-size:7.6pt;color:var(--muted)}}
 </style></head>
 <body><div class="sheet" id="sheet">
-<header><img src="{logo}" alt="MadCityZen"><div class="k">Fiche technique<small>Mise à jour le {fr_date(f['updated'])}</small></div></header>
+<header><div class="brand"><img src="{logo}" alt="MadCityZen">{fftb}</div><div class="k">Fiche technique<small>Mise à jour le {fr_date(f['updated'])}</small></div></header>
 <div class="title"><h1>{split_title(f['title'])}</h1>{callout}</div>
 {spec}
 <div class="cols" id="cols">

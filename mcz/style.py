@@ -16,7 +16,8 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--secondary);outline-
 @media (max-width:480px){.wrap{padding-inline:16px}}
 header.top{border-bottom:1px solid var(--line)}
 header.top .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding-block:14px}
-header.top img{height:46px;width:auto;display:block}
+header.top .brand{display:flex;flex-wrap:wrap;align-items:center;gap:18px}
+header.top .brand>img{height:46px;width:auto;display:block}
 .kicker{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.09em;text-transform:uppercase}
 .meta{font-size:14px;color:var(--muted)}
 .actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;padding-top:20px}
@@ -74,8 +75,12 @@ video{width:100%;aspect-ratio:16/9;display:block;border-radius:20px;border:1px s
 .count{font-size:15px;color:var(--muted);margin:-12px 0 20px}
 .empty{padding:28px;border:1px dashed var(--muted);border-radius:16px;color:var(--muted)}
 footer.bot{background:var(--ink);color:var(--bg)}
-footer.bot .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;padding-block:28px}
+footer.bot .wrap{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between;padding-block:28px}
 footer.bot a{color:var(--bg)}
+.fftb{display:inline-flex;align-items:center;gap:10px;padding-left:18px;border-left:1.5px solid var(--line)}
+.fftb img{flex:none;height:38px;width:auto;display:block}
+.fftb span{font-size:11.5px;line-height:1.35;letter-spacing:.01em;color:var(--muted);font-weight:500}
+@media (max-width:560px){.fftb{padding-left:0;border-left:0}}
 .lb{position:fixed;inset:0;background:rgba(30,24,28,.92);display:flex;align-items:center;justify-content:center;padding:24px;z-index:10}
 .lb img{max-width:100%;max-height:100%;border-radius:12px}
 .lb button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;min-width:44px;min-height:44px;border-radius:999px;border:1px solid var(--bg);background:var(--ink);color:var(--bg);font-size:22px;cursor:pointer}

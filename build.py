@@ -24,6 +24,7 @@ INDEX_PAGE = "8a50a915e7434ef39a6ac8d31fed6d21"          # « Fiches Descriptive
 PHOTOS_DS = "15a9f3e2-8e61-483f-82bf-69ae5dcb4b1f"        # base « Photos Animations »
 BASE_URL = "https://fiches.madcityzen.fr"
 LOGO = "media/logo-mcz-2025.svg"  # renommer à chaque changement de logo (caches navigateurs)
+LOGO_FFTB = "media/logo-fftb.png"  # badge Fédération Française de Team Building, affiché sur chaque fiche
 PARSER_VERSION = 3  # à incrémenter quand la lecture des fiches change : force leur relecture
 
 warnings = []
@@ -227,7 +228,7 @@ def make_pdfs(fiches):
     pcache.mkdir(exist_ok=True)
     todo = []
     for f in fiches:
-        doc = pdf.page(f, LOGO, BASE_URL)
+        doc = pdf.page(f, LOGO, BASE_URL, LOGO_FFTB)
         h = hashlib.sha256(doc.encode()).hexdigest()[:20]
         cached = pcache / f"{h}.pdf"
         if cached.exists():
@@ -339,13 +340,14 @@ def main():
 
     (OUT / "media").mkdir(exist_ok=True)
     shutil.copy2(ROOT / "assets" / "logo-madcityzen.svg", OUT / LOGO)
+    shutil.copy2(ROOT / "assets" / "logo-fftb.png", OUT / LOGO_FFTB)
     # photos sources déposées via Claude (référencées en images externes dans Notion)
     if (ROOT / "assets" / "uploads").exists():
         shutil.copytree(ROOT / "assets" / "uploads", OUT / "uploads")
     make_pdfs(fiches)
     for f in fiches:
         has_pdf = (OUT / "pdf" / f"{f['slug']}.pdf").exists()
-        (OUT / f"{f['slug']}.html").write_text(render.page(f, LOGO, f"/pdf/{f['slug']}.pdf" if has_pdf else None), encoding="utf-8")
+        (OUT / f"{f['slug']}.html").write_text(render.page(f, LOGO, f"/pdf/{f['slug']}.pdf" if has_pdf else None, LOGO_FFTB), encoding="utf-8")
     site = json.loads((ROOT / "config" / "site.json").read_text(encoding="utf-8"))
     cat_dir = OUT / site["catalogue_path"]
     cat_dir.mkdir()

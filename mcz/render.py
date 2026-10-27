@@ -130,7 +130,7 @@ PRINT_JS = """<script>
 </script>"""
 
 
-def page(f, logo, pdf=None):
+def page(f, logo, pdf=None, logo_fftb=None):
     """f : modèle complet d'une fiche (contenu + médias préparés) ; pdf : adresse du résumé A4."""
     title = f["title"]
     secs = f["sections"]
@@ -207,6 +207,9 @@ def page(f, logo, pdf=None):
         actions = (f'<div class="actions"><a class="btn" href="{pdf}" download="{fname}">{DL_ICON}<span>Télécharger la fiche PDF</span></a>'
                    f'<button type="button" class="btn ghost" id="print-pdf" data-pdf="{pdf}">{PRINT_ICON}<span>Imprimer</span></button></div>')
     short = split_title_parts(title)[0]
+    fftb_badge = (f'<div class="fftb" title="Membre de la Fédération Française de Team Building">'
+                  f'<img src="/{logo_fftb}" alt="" width="34" height="36" loading="lazy">'
+                  f'<span>Membre de la<br>Fédération Française<br>de Team Building</span></div>') if logo_fftb else ""
     return f"""<!doctype html>
 <html lang="fr">
 <head>
@@ -220,7 +223,7 @@ def page(f, logo, pdf=None):
 </head>
 <body>
 <header class="top"><div class="wrap">
-<img src="/{logo}" alt="MadCityZen">
+<div class="brand"><img src="/{logo}" alt="MadCityZen">{fftb_badge}</div>
 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span class="kicker">Fiche technique</span><span class="meta">Mise à jour le {fr_date(f["updated"])}</span></div>
 </div></header>
 <main>
